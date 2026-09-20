@@ -1,0 +1,14 @@
+node_modules/
+dist/
+
+# Playwright MCP live-browser test artifacts (screenshots/snapshots/console logs)
+.playwright-mcp/
+
+# Vendored/regenerable AI-agent skill content (reinstall via `npx modern-web-guidance@latest install`)
+.agents/
+.claude/
+skills-lock.json
+
+# OS/editor cruft
+.DS_Store
+*.log
