@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { findGridAncestor, findSlot } from "../../src/content/grid-container";
+import { findGridAncestor, findSlot, isRailTile, excludeRailTiles } from "../../src/content/grid-container";
 import type { TileRecord } from "../../src/content/dom-scanner";
 
 function makeTile(element: HTMLElement): TileRecord {
@@ -79,5 +79,41 @@ describe("findSlot", () => {
     const row = document.getElementById("row") as HTMLElement;
     const a = document.querySelector('[data-item-id="a"]') as HTMLElement;
     expect(findSlot(a, row)).toBe(a);
+  });
+});
+
+describe("excludeRailTiles", () => {
+  function railPage(): void {
+    document.body.innerHTML = `
+      <section>
+        <div id="row">
+          <div class="cell"><div data-item-id="grid-1">G1</div></div>
+          <div class="cell"><div data-item-id="grid-2">G2</div></div>
+        </div>
+        <div data-testid="horizontal-scroller-Buy it again">
+          <ul data-testid="carousel-container">
+            <li data-slide="0"><div data-item-id="rail-1">R1</div></li>
+            <li data-slide="1"><div data-item-id="rail-2">R2</div></li>
+            <li data-slide="2"><div data-item-id="rail-3">R3</div></li>
+          </ul>
+        </div>
+      </section>
+    `;
+  }
+
+  it("flags carousel tiles and keeps grid tiles", () => {
+    railPage();
+    const railTile = document.querySelector('[data-item-id="rail-1"]') as HTMLElement;
+    const gridTile = document.querySelector('[data-item-id="grid-1"]') as HTMLElement;
+    expect(isRailTile(railTile)).toBe(true);
+    expect(isRailTile(gridTile)).toBe(false);
+  });
+
+  it("drops rail tiles so a fat rail cannot win the ancestor vote", () => {
+    railPage();
+    const tiles = Array.from(document.querySelectorAll<HTMLElement>("[data-item-id]")).map(makeTile);
+    const grid = excludeRailTiles(tiles);
+    expect(grid.map((t) => t.id).sort()).toEqual(["grid-1", "grid-2"]);
+    expect(findGridAncestor(grid)?.id).toBe("row");
   });
 });

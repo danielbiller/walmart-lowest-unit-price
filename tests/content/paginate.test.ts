@@ -3,7 +3,7 @@
 // instead of the workspace-default "node" environment (see vitest.config.ts).
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { buildPageUrl, collectAllPages } from "../../src/content/paginate";
+import { buildPageUrl, collectAllPages, collectPageRange, fetchPageTiles } from "../../src/content/paginate";
 
 function tileHtml(ids: string[]): string {
   const tiles = ids
@@ -107,5 +107,67 @@ describe("collectAllPages", () => {
       collectAllPages("https://www.walmart.com/search?q=towels", 5)
     ).resolves.toEqual({ pageTiles: [], pagesFetched: 0 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("collectPageRange", () => {
+  it("starts at an arbitrary page and reports the last attempted page", async () => {
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const page = new URL(String(input)).searchParams.get("page");
+      if (page === "4") return makeResponse(tileHtml(["p4-1"]));
+      return makeResponse(NO_TILES_HTML);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await collectPageRange("https://www.walmart.com/search?q=towels", 4, 8);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2); // page 4 tiles, page 5 empty -> stop
+    expect(result.pageTiles.map((pt) => pt.tile.id)).toEqual(["p4-1"]);
+    expect(result.pagesFetched).toBe(1);
+    expect(result.lastAttempted).toBe(5);
+  });
+
+  it("returns empty without fetching when the range is inverted", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await collectPageRange("https://www.walmart.com/search?q=towels", 9, 8);
+
+    expect(result).toEqual({ pageTiles: [], pagesFetched: 0, lastAttempted: 8 });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("fetchPageTiles grid scoping", () => {
+  it("excludes side-rail tiles from fetched pages", async () => {
+    const html = `<!doctype html><html><body>
+      <div id="row">
+        <div class="cell"><div data-item-id="g1" aria-label="Price $1.00 $0.10/oz T">g1</div></div>
+        <div class="cell"><div data-item-id="g2" aria-label="Price $2.00 $0.20/oz T">g2</div></div>
+      </div>
+      <div id="rail"><div data-item-id="r1" aria-label="Price $9.00 $0.90/oz Rail">r1</div></div>
+    </body></html>`;
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, text: async () => html }) as Response));
+
+    const pageTiles = await fetchPageTiles("https://www.walmart.com/search?q=towels&page=2");
+
+    expect(pageTiles.map((pt) => pt.tile.id).sort()).toEqual(["g1", "g2"]);
+  });
+
+  it("a carousel rail outnumbering the grid never wins the fetched vote", async () => {
+    const html = `<!doctype html><html><body>
+      <div id="row">
+        <div class="cell"><div data-item-id="g1" aria-label="Price $1.00 $0.10/oz T">g1</div></div>
+      </div>
+      <div data-testid="horizontal-scroller-Buy it again"><ul data-testid="carousel-container">
+        <li data-slide="0"><div data-item-id="r1" aria-label="Price $9.00 $0.90/oz Rail">r1</div></li>
+        <li data-slide="1"><div data-item-id="r2" aria-label="Price $8.00 $0.80/oz Rail">r2</div></li>
+      </ul></div>
+    </body></html>`;
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, text: async () => html }) as Response));
+
+    const pageTiles = await fetchPageTiles("https://www.walmart.com/search?q=towels&page=2");
+
+    expect(pageTiles.map((pt) => pt.tile.id)).toEqual(["g1"]);
   });
 });

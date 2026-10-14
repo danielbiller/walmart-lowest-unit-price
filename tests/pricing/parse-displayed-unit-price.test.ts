@@ -30,6 +30,22 @@ describe("parseDisplayedUnitPrice", () => {
     expect(result!.pricePerBaseUnit).toBeCloseTo(0.0106, 5);
   });
 
+  it("parses cent-denominated forms as fractions of a dollar", () => {
+    const per100 = parseDisplayedUnitPrice("26.0 ¢/100 ct");
+    expect(per100).not.toBeNull();
+    expect(per100!.dimension).toBe("count");
+    expect(per100!.pricePerBaseUnit).toBeCloseTo(0.0026, 6);
+
+    const perCount = parseDisplayedUnitPrice("5.9 ¢/count");
+    expect(perCount).not.toBeNull();
+    expect(perCount!.dimension).toBe("count");
+    expect(perCount!.pricePerBaseUnit).toBeCloseTo(0.059, 5);
+
+    const perEach = parseDisplayedUnitPrice("4.2 ¢/ea");
+    expect(perEach).not.toBeNull();
+    expect(perEach!.pricePerBaseUnit).toBeCloseTo(0.042, 5);
+  });
+
   it("returns null for null input", () => {
     expect(parseDisplayedUnitPrice(null)).toBeNull();
   });

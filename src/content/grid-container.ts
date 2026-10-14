@@ -11,6 +11,23 @@
 
 import type { TileRecord } from "./dom-scanner";
 
+// Structural carousel/rail markers, observed live: rail tiles sit under a
+// carousel container of slide items inside a named horizontal scroller.
+// Matched structurally (no heading keywords, no positional hooks), so the
+// rule survives copy changes and reorderings.
+const RAIL_ANCESTOR_SELECTOR =
+  'ul[data-testid="carousel-container"], li[data-slide], [data-testid^="horizontal-scroller-"]';
+
+/** True when the tile lives inside a rail/carousel section, not the results grid. */
+export function isRailTile(element: Element): boolean {
+  return element.closest(RAIL_ANCESTOR_SELECTOR) !== null;
+}
+
+/** Drops rail/carousel tiles so they never enter grid voting, moves, or counts. */
+export function excludeRailTiles(tiles: TileRecord[]): TileRecord[] {
+  return tiles.filter((tile) => !isRailTile(tile.element));
+}
+
 export function findGridAncestor(tiles: TileRecord[]): Element | null {
   if (tiles.length === 0) return null;
 

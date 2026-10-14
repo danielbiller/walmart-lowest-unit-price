@@ -62,6 +62,7 @@ const UNIT_ALIASES: Record<string, Unit> = {
   kg: "kg",
   ct: "ct",
   ea: "ea",
+  count: "ct",
   qt: "qt",
   gal: "gal",
 };

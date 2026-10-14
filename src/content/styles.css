@@ -20,6 +20,16 @@
   position: relative;
 }
 
+/* Title-guessed unit price: deliberately "uncertain" next to Walmart's own
+   unit-price text — italic amber, never mistaken for a displayed value. */
+.lup-estimate {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-style: italic;
+  color: #8d6e00;
+}
+
 .lup-overlay {
   position: fixed;
   bottom: 16px;
@@ -55,4 +65,72 @@
 
 .lup-overlay-dismiss:hover {
   opacity: 0.75;
+}
+
+.lup-overlay-details {
+  flex-shrink: 0;
+  border: 1px solid #555555;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+.lup-overlay-details:hover {
+  background-color: #333333;
+}
+
+.lup-panel {
+  flex-basis: 100%;
+  border-top: 1px solid #444444;
+  margin-top: 4px;
+  padding-top: 8px;
+  font-size: 12px;
+}
+
+.lup-panel-summary {
+  opacity: 0.9;
+}
+
+.lup-panel-groups {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+.lup-panel-groups li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 296px;
+  opacity: 0.9;
+}
+
+.lup-panel-stepper,
+.lup-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.lup-panel button {
+  border: 1px solid #555555;
+  border-radius: 6px;
+  background-color: #333333;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 3px 8px;
+}
+
+.lup-panel button:hover:not(:disabled) {
+  background-color: #444444;
+}
+
+.lup-panel button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }

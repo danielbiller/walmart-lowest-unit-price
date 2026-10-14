@@ -2,8 +2,10 @@
 
 ## Current focus
 
-Memory-bank + git init (2026-10-14). Full codebase scan done; writing the
-6 memory-bank files and committing untracked `openspec/` scaffold.
+Change `priced-first-sort-and-fetch-panel` archived 2026-10-14
+(15/15 tasks, 4 main specs synced, validated). Single commit pending.
+Next change: dup-id merge, ads/SPA resolution (needs user DevTools
+checks), per-dimension badge labels — all diagnosed, none implemented.
 
 ## Recent changes
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toBaseUnit, groupByComparableUnit } from "../../src/pricing/units";
+import { toBaseUnit, groupByComparableUnit, parseUnitToken } from "../../src/pricing/units";
 
 describe("toBaseUnit", () => {
   it("converts weight units to base oz", () => {
@@ -49,5 +49,16 @@ describe("groupByComparableUnit", () => {
 
   it("returns an empty array for no entries", () => {
     expect(groupByComparableUnit([])).toEqual([]);
+  });
+});
+
+describe("parseUnitToken", () => {
+  it("normalizes spelled-out count to ct", () => {
+    expect(parseUnitToken("count")).toBe("ct");
+    expect(parseUnitToken("Count")).toBe("ct");
+  });
+
+  it("returns null for unknown tokens", () => {
+    expect(parseUnitToken("widget")).toBeNull();
   });
 });

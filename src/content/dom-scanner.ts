@@ -23,9 +23,10 @@ const TILE_SELECTOR = "[data-item-id]";
 const PRICE_REGEX = /\$\s?\d[\d,]*\.\d{1,2}/;
 
 // Matches Walmart's displayed unit price, e.g. "$0.12/fl oz", "$1.50 / lb",
-// or the "price per N units" form "$1.06/100 ct".
+// the "price per N units" form "$1.06/100 ct", or cent forms "26.0 ¢/100 ct"
+// (symbol may lead or trail the amount, but one is required).
 const UNIT_PRICE_REGEX =
-  /\$\s?\d[\d,]*(?:\.\d{1,2})?\s*\/\s*\d*\s*(?:fl\.?\s?oz|oz|lb|ct|ea|l|ml|g|kg|qt|gal)\b/i;
+  /(?:[$¢]\s?\d[\d,]*(?:\.\d{1,2})?\s?¢?|\d[\d,]*(?:\.\d{1,2})?\s?¢)\s*\/\s*\d*\s*(?:fl\.?\s?oz|oz|lb|ct|ea|count|l|ml|g|kg|qt|gal)\b/i;
 
 const TITLE_TESTID_SELECTOR =
   '[data-testid*="product-title" i], [data-testid*="productName" i], [data-automation-id*="product-title" i]';
@@ -103,6 +104,15 @@ function extractUnitPriceText(
     const match = text.match(UNIT_PRICE_REGEX);
     if (match) return match[0].trim();
   }
+
+  // Walmart sometimes splits value and unit across sibling nodes ("$0.82" +
+  // "/oz"), so no single leaf matches. Joining trimmed leaves separator-free
+  // is safe here (unlike total price): the regex still requires $<num>/<unit>
+  // adjacency, which a bare "$684"-style digit pile-up cannot satisfy.
+  const joined = candidates.map(({ text }) => text).join("");
+  const joinedMatch = joined.match(UNIT_PRICE_REGEX);
+  if (joinedMatch) return joinedMatch[0].trim();
+
   return null;
 }
 
