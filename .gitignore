@@ -12,3 +12,8 @@ skills-lock.json
 # OS/editor cruft
 .DS_Store
 *.log
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
+
+# Local opencode slash commands (per-machine workflow helpers, not shared)
+.opencode/commands/opsx-*
