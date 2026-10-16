@@ -1,0 +1,12 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "launchOptions": {
+      "args": [
+        "--disable-extensions-except=/mnt/c/Dev/Active/walmart-lowest-unit-price/dist",
+        "--load-extension=/mnt/c/Dev/Active/walmart-lowest-unit-price/dist",
+        "--remote-debugging-port=9223"
+      ]
+    }
+  }
+}

@@ -17,3 +17,6 @@ skills-lock.json
 
 # Local opencode slash commands (per-machine workflow helpers, not shared)
 .opencode/commands/opsx-*
+
+# Playwright CLI live-run profile (regenerated per machine, see .playwright/README.md)
+.playwright/profile/
